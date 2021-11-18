@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  couchdb:
+    image: couchdb 
+    environment:
+      - COUCHDB_PASSWORD=couchdb
+    ports:
+      - '5984:5984'
+    volumes:
+      - ${PWD}/.db_data:/opt/couchdb/data
