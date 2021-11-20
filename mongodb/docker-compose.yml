@@ -3,11 +3,25 @@ services:
   mongo:
     image: mongo
     environment:
-      - MONGO_INITDB_DATABASE=${MONGO_DB}
+      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME}
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PW}
     ports:
-      - "2717-2719:2717-2719"
+      - '27017:27017'
     volumes:
+      - ${PWD}/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
       - ${PWD}/.db_data:/data/db
-      - ${PWD}/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo-js:ro
+
+  mongo-express:
+    image: mongo-express:0.54.0
+    restart: always
+    depends_on:
+      - mongo
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_USERNAME}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_PW}
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGOEXPRESS_USERNAME}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGOEXPRESS_PW}
+    ports:
+      - '8081:8081'
