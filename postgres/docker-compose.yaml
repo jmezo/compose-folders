@@ -6,6 +6,8 @@ services:
       - "5432:5432"
     env_file:
       - .env # configure postgres
+    volumes:
+      - ${PWD}/.db_data:/var/lib/postgresql/data/
 
   pgadmin:
     image: dpage/pgadmin4
