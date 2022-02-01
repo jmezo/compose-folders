@@ -8,6 +8,8 @@ services:
       - .env # configure postgres
     volumes:
       - ${PWD}/.db_data:/var/lib/postgresql/data/
+      - ${PWD}/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
 
   pgadmin:
     image: dpage/pgadmin4
