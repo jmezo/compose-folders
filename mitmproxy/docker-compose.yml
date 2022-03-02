@@ -1,0 +1,5 @@
+proxy:
+  image: mitmproxy/mitmproxy
+  command: mitmdump -p 443 --mode reverse:${MITMPROXY_URL} --proxyauth ${MITMPROXY_AUTH} --set block_global=true
+  ports:
+   - "443:443"
