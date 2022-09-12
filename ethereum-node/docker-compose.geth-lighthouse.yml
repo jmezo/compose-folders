@@ -1,0 +1,60 @@
+version: "3.7"
+
+# generate a jwt secret with the following command
+# openssl rand -hex 32 | tr -d "\n" > "jwt.hex"
+networks:
+  geth:
+
+services:
+  geth:
+    image: ethereum/client-go:alltools-stable
+    command: >
+     geth
+       --datadir "/root/geth_data"
+       --http --http.api="eth,web3,net" --http.vhosts="*" --http.corsdomain "*"
+       --ws --ws.api="eth,web3,net"
+       --authrpc.addr geth
+       --authrpc.port 8551
+       --authrpc.vhosts geth
+       --authrpc.jwtsecret /root/jwtsecret
+       --authrpc.vhosts="*"
+       --override.terminaltotaldifficulty 58750000000000000000000
+    networks:
+      - geth
+    ports:
+      - 30303:30303
+      - 30303:30303/udp
+      - 30304:30304
+      - 30304:30304/udp
+    volumes:
+      - ./geth_data:/root/geth_data:rw
+      - ./config.toml:/srv/config.toml:ro
+      - ./jwt.hex:/root/jwtsecret:ro
+
+  beacon_node:
+    depends_on:
+      - geth
+    image: sigp/lighthouse:latest
+    command: >
+      lighthouse 
+        --network mainnet
+      beacon_node
+        --datadir ./root/lighthouse_data
+        --eth1
+        --http
+        --http-address 0.0.0.0
+        --metrics
+        --execution-endpoint http://geth:8551
+        --enr-udp-port=9000
+        --enr-tcp-port=9000
+        --discovery-port=9000
+        --jwt-secrets="/root/jwtsecret"
+    networks:
+      - geth
+    ports:
+      - 5053:5053/tcp
+      - 9000:9000/tcp
+      - 9000:9000/udp
+    volumes:
+      - ./lighthouse_data:/root/lighthouse_data:rw
+      - ./jwt.hex:/root/jwtsecret:ro
