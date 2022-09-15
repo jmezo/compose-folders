@@ -1,0 +1,48 @@
+version: "3.7"
+
+# generate a jwt secret with the following command
+# # openssl rand -hex 32 | tr -d "\n" > "jwt.hex"
+services:
+  erigon:
+    build: .
+    command: >
+     erigon
+       --http.trace
+       --http.addr "0.0.0.0"
+       --http.port "8545"
+       --datadir "/home/erigon/app/data"
+       --authrpc.jwtsecret "/home/erigon/app/jwtsecret"
+       --authrpc.addr "0.0.0.0"
+       --authrpc.port "8551"
+       --authrpc.vhosts "*"
+    ports:
+      - "127.0.0.1:8545:8545"
+    volumes:
+      - ./erigon_data:/home/erigon/app/data:rw
+      - ./jwt.hex:/home/erigon/app/jwtsecret:ro
+
+  lighthouse:
+    depends_on:
+      - erigon
+    image: sigp/lighthouse:latest
+    command: >
+      lighthouse 
+        --network mainnet
+      beacon_node
+        --datadir ./root/lighthouse_data
+        --eth1
+        --http
+        --http-address 0.0.0.0
+        --metrics
+        --execution-endpoint http://erigon:8551
+        --enr-udp-port=9000
+        --enr-tcp-port=9000
+        --discovery-port=9000
+        --jwt-secrets="/root/jwtsecret"
+    ports:
+      - 5053:5053/tcp
+      - 9000:9000/tcp
+      - 9000:9000/udp
+    volumes:
+      - ./lighthouse_data:/root/lighthouse_data:rw
+      - ./jwt.hex:/root/jwtsecret:ro
