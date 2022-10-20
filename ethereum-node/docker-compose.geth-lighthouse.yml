@@ -12,6 +12,7 @@ services:
      geth
        --datadir "/root/geth_data"
        --http --http.api="eth,web3,net" --http.vhosts="*" --http.corsdomain "*"
+       --http.rpcprefix "/secret_url_path"
        --ws --ws.api="eth,web3,net"
        --authrpc.addr geth
        --authrpc.port 8551
