@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  blue:
+    build:
+      context: ./blue
+      dockerfile: Dockerfile
+
+  green:
+    build:
+      context: ./green
+      dockerfile: Dockerfile
+
+  nginx-proxy:
+    image: nginx:1.25
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.weighted.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - blue
+      - green
