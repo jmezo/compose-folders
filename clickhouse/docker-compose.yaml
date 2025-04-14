@@ -1,0 +1,27 @@
+services:
+  clickhouse:
+    image: 'clickhouse/clickhouse-server:latest'
+    container_name: clickhouse
+    restart: always
+    # user: '101:101'
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: password
+    volumes:
+      # - fs/clickhouse-server.service:/etc/systemd/system/clickhouse-server.service
+      # - /mnt/clickhouse-disk/clickhouse-data:/var/lib/clickhouse
+    ports:
+      - '0.0.0.0:8123:8123'
+      - '0.0.0.0:9000:9000'
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  ch-ui:
+    image: ghcr.io/caioricciuti/ch-ui:latest
+    restart: always
+    ports:
+      - "5521:5521"
